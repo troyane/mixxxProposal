@@ -2,7 +2,6 @@
 \usepackage[utf8x]{inputenc}
 \usepackage[english]{babel}
 
-
 \usepackage{url}
 \usepackage[pdfauthor={Nazar ``tr0'' Gerasymchuk},%
 pdftitle={Proposal for Mixxx's project ``Non-Blocking Database Access''},%
@@ -16,29 +15,28 @@ pdftex]{hyperref}
 \begin{document}
 
 \maketitle
-\nvDash
 \begin{abstract}
 Let me introduce myself. I'm getting Master degree at Cybernetics
 Department of Taras Shevchenko National University of Kyiv, Ukraine (\url{http://univ.kiev.ua/en}).
 
-I'm Qt programmer for about 3 years. I have an experience with programming databases (MySQL, SQLite), threads etc.
+I'm Qt programmer for about 3 years. I have some experience with programming databases (MySQL, SQLite), threads etc.
 
-I still have burning desire to take part in development of Mixxx. Also, I'm interested in music production. You can listen some of my own tracks here -- \url{http://soundcloud.com/tr0}.
+I still have burning desire to take a part in development of Mixxx. Also, I'm interested in music production. You can listen some of my own tracks here -- \url{http://soundcloud.com/tr0}. Sometimes I write programming notes at my blog -- \url{http://neval8.wordpress.com}. Hope, there will be more on related to development of Mixxx themes soon.
 \end{abstract}
 
 \tableofcontents
 
 \section{Intro}
 
-\textbf{``Non-Blocking Database Access''} is one of most clear projects for me.
+\textbf{``Non-Blocking Database Access''} is one of the clearest projects for me.
 
-I have some skills and practice with programming databases using Qt. So think that project is suitable for me. Sometimes I write programming notes at my blog -- \url{http://neval8.wordpress.com}. Hope, there will be more on related to development of Mixxx themes soon.
+I have some skills and practice with programming databases using Qt. Also I have a theoretical base I've not used yet. I'm sure the Mixxx can be a right place to improve my database programming skills.
 
 \section{What do I have now?}
 \begin{itemize}
  \item My working OS is Debian GNU/Linux now.
- \item I'm registered user at Launchpad and am able to chek out Mixxx sources.
- \item I'm learning to use \texttt{bzr}. I see that \texttt{bzr} is nice distributed revision control system.
+ \item I'm registered user at Launchpad and I'm able to check out Mixxx sources.
+ \item I'm studying the \texttt{bzr} usage. I see that \texttt{bzr} is nice distributed revision control system.
  \item I accomplished connecting \texttt{scons} to QtCreator, so I got my favorite IDE working with \texttt{scons}. 
  And I compiled it (it took about 10 minutes on 4 cores). Here is draft article about how I do that: \\ \url{http://neval8.wordpress.com/2013/04/30/using-scons-with-qtcreator}.
 \end{itemize}
@@ -46,16 +44,16 @@ I have some skills and practice with programming databases using Qt. So think th
 
 \section{What'll I do next?}
 \begin{itemize}
- \item According to the fact of Mixxx is written in C++, we can make some static analysis by \texttt{cppcheck}%
- \footnote{Cppcheck (\url{http://cppcheck.sourceforge.net}) is a static analysis tool for C/C++ code. Unlike C/C++ compilers and many other analysis tools it does not detect syntax errors in the code. Cppcheck primarily detects the types of bugs that the compilers normally do not detect. The goal is to detect only real errors in the code (i.e. have zero false positives).},
+ \item According to the fact that Mixxx is written in C++, we can make some static analysis by \texttt{cppcheck}%
+ \footnote{Cppcheck (\url{http://cppcheck.sourceforge.net}) is a static analysis tool for C/C++ code. Unlike C/C++ compilers and many other analysis tools, it does not detect syntax errors in the code. Cppcheck primarily detects the types of bugs that the compilers normally do not detect. The goal is to detect only real errors in the code (i.e. have zero false positives).},
  as I did and got a bunch of warnings. Here, I can learn Mixxx sources deeper.
- \item Fix some issues found by \texttt{cppcheck}. Maybe it is not critical, but it helps to learn sources and become more familiar with it.
+ \item Fix some issues found by \texttt{cppcheck}. Maybe, it is not critical, but it helps to learn sources and become more familiar with it.
  \item Fix some issues and bugs from bugtracker.
  \item Work on my ideas and test them.
  \item Think out on my roadmap at GSoC 2013.
 \end{itemize}
 
-Some time ago, Ryan described problem with databases well on mailing list:
+Some time ago, Ryan have described precisely the problem with databases on mailing list:
 \textit{ Today's approach of doing some operations on the GUI thread blocks Qt from processing events. This has implications on Mixxx's responsiveness because things like waveform rendering cannot do work while the Qt main thread is blocked attempting to read/write from the database. As Daniel mentioned on the waveform thread, sometimes normal, small library operations hog the main thread for up to 20 ms. This is enough to cause a dropped frame when rendering the waveform at a reasonable FPS. It also increases the overall latency of the \texttt{ControlObject} system when the control events are proxied through the Qt event queue. So database queries on the main thread can add to the latency of pressing a button / slider / knob on the GUI. These are all motivating factors for moving database queries to a thread.}
 
 
@@ -78,7 +76,7 @@ can help not to mess the code in places where ``fix'' will be applied. We just m
 \subsection{QtConcurrent}
 \texttt{QtConcurrent}%
 \footnote{\textit{``QtConcurrent Namespace''} at QtProject -- \url{http://qt-project.org/doc/qt-4.8/qtconcurrent.html}.}
-is simple mechanism to get programs be multi-threaded with minimal overhead and also with minimal control on respective threads that is enough for us. Also, we can pass lambda to \texttt{QtCoucurrent::run} as parameter.
+is simple mechanism to get programs multi-threaded with minimal overhead and also with minimal control on respective threads that is enough for us. Also, we can pass lambda to \texttt{QtCoucurrent::run} as parameter.
 
 To implement user interaction while database is applying query, we should do next:
 \begin{itemize}
@@ -112,14 +110,14 @@ Main scheme is next:
   \item Send lambda work to other thread (using \texttt{QtConcurrent::run}).
   \item Control time of thread working (using \texttt{QFuture}).
   \begin{itemize}
-   \item If thread is working longer than some constant limit time, we must apply lambda got as parameter \textit{``how to freeze GUI''}.
-   \item If thread overtimed, than we need to apply lambda got as parameter \textit{``how to unfreeze GUI''}.
+   \item If thread is working longer than some constant limit time, we must apply received lambda as a parameter \textit{``how to freeze GUI''}.
+   \item If thread overtimed, than we need to apply received lambda as a parameter \textit{``how to unfreeze GUI''}.
   \end{itemize}
   \item Remove own event filter to unblock user input.
  \end{enumerate}
 \end{itemize}
 
-We'll wrap all code of \texttt{DAO}'s with next construction (see \texttt{DAO::applyQuery} in file \url{http://github.com/troyane/lambdaConcurrent/blob/master/dao.cpp)}.
+We'll wrap all code of \texttt{DAO}'s with the next construction (see \texttt{DAO::applyQuery} in file \url{http://github.com/troyane/lambdaConcurrent/blob/master/dao.cpp)}.
 
 I tried to comment as clear as I can, but if you have questions -- you are welcome.
 
