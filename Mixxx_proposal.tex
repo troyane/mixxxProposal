@@ -63,9 +63,9 @@ Mixxx in particular with GSoC 2013 team.
  as I did and got a bunch of warnings. Here, I can learn Mixxx sources deeper.
  \item Fix some issues found by \texttt{cppcheck}. Maybe, it is not critical, but it helps to learn 
     sources and become more familiar with it.
- \item Fix some issues and bugs from bugtracker.
+ \item Fix some issues and bugs from bug-tracker.
  \item Work on my ideas and test them.
- \item Think out on my roadmap at GSoC 2013.
+ \item Think out on my road-map at GSoC 2013.
 \end{itemize}
 
 Some time ago, Ryan have described precisely the problem with databases on mailing list:
@@ -102,22 +102,22 @@ To implement user interaction while database is applying query, we should do nex
 \end{itemize}
 
 \subsection{Transactions and multithreading}
-Transactions are good mechanism, and all of queries which modify database can be wraped onto transaction 
+Transactions are good mechanism, and all of queries which modify database can be wrapped onto transaction 
 system. But, well-known fact is that SQLite able to hold multithreading, but doesn't like it.
 
 Snazzer at StackOverflow%
 \footnote{``How to use SQLite in a multi-threaded application?'', \url{http://stackoverflow.com/a/1680871}}
 say on this:
-Some steps when starting out with SQLlite for multithreaded use:
+Some steps when starting out with SQLlite for multi-threaded use:
 \begin{enumerate}
- \item Make sure sqlite is compiled with the multi threaded flag.
- \item You must call open on your sqlite file to create a connection on each thread, don't share connections 
+ \item Make sure SQLite is compiled with the multi-threaded flag.
+ \item You must call open on your SQLite file to create a connection on each thread, don't share connections 
     between threads.
  \item SQLite has a very conservative threading model, when you do a write operation, which includes opening 
     transactions that are about to do an INSERT/UPDATE/DELETE, other threads will be blocked until this 
     operation completes.
  \item If you don't use a transaction, then transactions are implicit, so if you start a 
-    \texttt{INSERT/DELETE/UPDATE}, sqlite will try to acquire an exclusive lock, and complete the operation 
+    \texttt{INSERT/DELETE/UPDATE}, SQLite will try to acquire an exclusive lock, and complete the operation 
     before releasing it.
  \item If you do a \texttt{BEGIN EXCLUSIVE} statement, it will acquire an exclusive lock before doing operations 
     in that transaction. A \texttt{COMMIT} or \texttt{ROLLBACK} will release the lock.
@@ -125,11 +125,11 @@ Some steps when starting out with SQLlite for multithreaded use:
 \end{enumerate}
 
 We must keep in mind that connection can only be used from within the thread that created it. Moving connections 
-between threads or creating queries from a different thread is not supported%
+between threads or creating queries from a different thread are not supported%
 \footnote{``Thread-Support in Qt Modules'' --
 \url{http://qt-project.org/doc/qt-4.8/threads-modules.html\#threads-and-the-sql-module}}.
 
-To avoid unexpected behavior as result of multithreaded queries, as I think, we must think out and create own 
+To avoid unexpected behaviour as result of multi-threaded queries, as I think, we must think out and create own 
 query manager. And till that time, try to avoid such type of concurrent queries.
 
 \paragraph{Library scanner and BaseSqlTableModel.} Unfortunately, I'm not involved into development of 
@@ -158,7 +158,7 @@ do not hang the application, but can gently show ``wait'' message.
 is simple mechanism to get programs multi-threaded with minimal overhead and also with minimal control on 
 respective threads that is enough for us. Also, we can pass lambda to \texttt{QtCoucurrent::run} as parameter.
 
-The \texttt{QtConcurrent} namespace provides high-level APIs that make it possible to write multi-threaded 
+The \texttt{QtConcurrent} name space provides high-level APIs that make it possible to write multi-threaded 
 programs without using low-level threading primitives such as mutexes, read-write locks, wait conditions, or 
 semaphores. Programs written with \texttt{QtConcurrent} automatically adjust the number of threads used 
 according to the number of processor cores available. This means that applications written today will continue 
@@ -182,7 +182,7 @@ in time. The result can be of any type that has a default constructor and a copy
 The state of the computation represented by a \texttt{QFuture} can be queried using the \texttt{isCanceled()}, 
 \texttt{isStarted()}, \texttt{isFinished()}, \texttt{isRunning()}, or \texttt{isPaused()} functions.
 
-\texttt{QFuture<void>} is specialized to not contain any of the result fetching functions. Any \texttt{QFuture<T>} 
+\texttt{QFuture<void>} is specialised to not contain any of the result fetching functions. Any \texttt{QFuture<T>} 
 can be assigned or copied into a \texttt{QFuture<void>} as well. This is useful if only status or progress information 
 is needed -- not the actual result data.
 
@@ -196,7 +196,7 @@ Main scheme is next:
  \begin{enumerate}
   \item Prepare query string (as it was before).
   \item Prepare lambda \textit{``how to prepare GUI for long-time operation''} \\(Inform user. Show some progress bar etc.).
-  \item Prepare lambda \textit{``how to release GUI after long-tim operation''} \\(Inform user. Hide some progress bar etc.).
+  \item Prepare lambda \textit{``how to release GUI after long-time operation''} \\(Inform user. Hide some progress bar etc.).
   \item Call concrete \texttt{DAO}s \texttt{applyQuery} function with (2) and (3) parameters (lambdas 
     \textit{``how to prepare GUI for long-time operation''}, \textit{``how to release GUI after long-tim operation''}).
   \item Release GUI thread -- let it flow as it is.
@@ -210,7 +210,7 @@ Main scheme is next:
   \begin{itemize}
    \item If thread is working longer than some constant limit time, we must apply received lambda as a parameter 
     \textit{``how to prepare GUI for long-time operation''}.
-   \item If thread overtimed, than we need to apply received lambda as a parameter \textit{``how to release GUI after long-tim operation''}.
+   \item If thread overtimed, than we need to apply received lambda as a parameter \textit{``how to release GUI after long-time operation''}.
   \end{itemize}
   \item Remove own event filter to unblock user input.
  \end{enumerate}
@@ -222,7 +222,7 @@ We'll wrap all code of \texttt{DAO}'s with the next construction (see \texttt{DA
 I tried to comment as clear as I can, but if you have questions -- you are welcome.
 
 
-\section{Approximate roadmap}
+\section{Approximate road-map}
 \begin{enumerate}
  \item Learn Mixxx sources (to understand how does it work) -- \textit{continuous process}.
  \begin{enumerate}
