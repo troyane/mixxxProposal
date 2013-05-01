@@ -16,91 +16,189 @@ pdftex]{hyperref}
 
 \maketitle
 \begin{abstract}
-Let me introduce myself. I'm getting Master degree at Cybernetics
-Department of Taras Shevchenko National University of Kyiv, Ukraine (\url{http://univ.kiev.ua/en}).
+I'm getting Master degree at Cybernetics Department of Taras Shevchenko National
+University of Kyiv, Ukraine (\url{http://univ.kiev.ua/en}).
 
-I'm Qt programmer for about 3 years. I have some experience with programming databases (MySQL, SQLite), threads etc.
+I'm Qt programmer for about 3 years. I have some experience with programming databases 
+(MySQL, SQLite), threads etc.
 
-I still have burning desire to take a part in development of Mixxx. Also, I'm interested in music production. You can listen some of my own tracks here -- \url{http://soundcloud.com/tr0}. Sometimes I write programming notes at my blog -- \url{http://neval8.wordpress.com}. Hope, there will be more on related to development of Mixxx themes soon.
+I have burning desire to take a part in development of Mixxx. Also, I'm interested in music 
+production. You can listen some of my own tracks here -- \url{http://soundcloud.com/tr0}.
+Sometimes I write programming notes at my blog -- \url{http://neval8.wordpress.com}. 
+Hope, soon there will be more themes on related to development of Mixxx.
 \end{abstract}
 
 \tableofcontents
 
+\newpage
 \section{Intro}
 
 \textbf{``Non-Blocking Database Access''} is one of the clearest projects for me.
 
-I have some skills and practice with programming databases using Qt. Also I have a theoretical base I've not used yet. I'm sure the Mixxx can be a right place to improve my database programming skills.
+I have some skills and practice with programming databases using Qt. Also I have a theoretical base 
+I've not used yet. I'm sure the Mixxx can be a right place to improve my programming skills and 
+I see possibility to make my personal contribution into Open~Source in general and into 
+Mixxx in particular with GSoC 2013 team.
 
 \section{What do I have now?}
 \begin{itemize}
  \item My working OS is Debian GNU/Linux now.
  \item I'm registered user at Launchpad and I'm able to check out Mixxx sources.
- \item I'm studying the \texttt{bzr} usage. I see that \texttt{bzr} is nice distributed revision control system.
- \item I accomplished connecting \texttt{scons} to QtCreator, so I got my favorite IDE working with \texttt{scons}. 
- And I compiled it (it took about 10 minutes on 4 cores). Here is draft article about how I do that: \\ \url{http://neval8.wordpress.com/2013/04/30/using-scons-with-qtcreator}.
+ \item I'm studying the \texttt{bzr} usage. I see that \texttt{bzr} is nice distributed revision 
+    control system.
+ \item I accomplished connecting \texttt{scons} to QtCreator, so I got my favorite IDE working 
+    with \texttt{scons}. And I compiled it (it took about 10 minutes on 4 cores). Here is 
+    draft article about how I done that: \\ \url{http://neval8.wordpress.com/2013/04/30/using-scons-with-qtcreator}.
 \end{itemize}
 
 
 \section{What'll I do next?}
 \begin{itemize}
- \item According to the fact that Mixxx is written in C++, we can make some static analysis by \texttt{cppcheck}%
- \footnote{Cppcheck (\url{http://cppcheck.sourceforge.net}) is a static analysis tool for C/C++ code. Unlike C/C++ compilers and many other analysis tools, it does not detect syntax errors in the code. Cppcheck primarily detects the types of bugs that the compilers normally do not detect. The goal is to detect only real errors in the code (i.e. have zero false positives).},
+ \item According to the fact that Mixxx is written in C++, we can make some static analysis by 
+    \texttt{cppcheck}%
+    \footnote{Cppcheck (\url{http://cppcheck.sourceforge.net}) is a static analysis tool for C/C++
+    code. Unlike C/C++ compilers and many other analysis tools, it does not detect syntax errors in 
+    the code. Cppcheck primarily detects the types of bugs that the compilers normally do not detect. 
+    The goal is to detect only real errors in the code (i.e. have zero false positives).},
  as I did and got a bunch of warnings. Here, I can learn Mixxx sources deeper.
- \item Fix some issues found by \texttt{cppcheck}. Maybe, it is not critical, but it helps to learn sources and become more familiar with it.
+ \item Fix some issues found by \texttt{cppcheck}. Maybe, it is not critical, but it helps to learn 
+    sources and become more familiar with it.
  \item Fix some issues and bugs from bugtracker.
  \item Work on my ideas and test them.
  \item Think out on my roadmap at GSoC 2013.
 \end{itemize}
 
 Some time ago, Ryan have described precisely the problem with databases on mailing list:
-\textit{ Today's approach of doing some operations on the GUI thread blocks Qt from processing events. This has implications on Mixxx's responsiveness because things like waveform rendering cannot do work while the Qt main thread is blocked attempting to read/write from the database. As Daniel mentioned on the waveform thread, sometimes normal, small library operations hog the main thread for up to 20 ms. This is enough to cause a dropped frame when rendering the waveform at a reasonable FPS. It also increases the overall latency of the \texttt{ControlObject} system when the control events are proxied through the Qt event queue. So database queries on the main thread can add to the latency of pressing a button / slider / knob on the GUI. These are all motivating factors for moving database queries to a thread.}
+\textit{ Today's approach of doing some operations on the GUI thread blocks Qt from processing events. 
+This has implications on Mixxx's responsiveness because things like waveform rendering cannot do work 
+while the Qt main thread is blocked attempting to read/write from the database. As Daniel mentioned on 
+the waveform thread, sometimes normal, small library operations hog the main thread for up to 20 ms. 
+This is enough to cause a dropped frame when rendering the waveform at a reasonable FPS. It also increases 
+the overall latency of the \texttt{ControlObject} system when the control events are proxied through 
+the Qt event queue. So database queries on the main thread can add to the latency of pressing a button 
+/ slider / knob on the GUI. These are all motivating factors for moving database queries to a thread.}
 
 
-\section{How I see the problem?}
+\section{How do I see the problem?}
 
-After exploring Mixxx sources I've found out that we have concrete DAO in GUI thread to access database. That concrete DAO applies query to database. Maybe, I missed something, but I haven't seen any errors processing (because a lot of things can happen while applying query) \texttt{// that is another story}.
+After exploring Mixxx sources I've found out that we have concrete DAO in GUI thread to access database. 
+That concrete DAO applies query to database.
 
-So, we need to keep all business logic the same, but bring all database queries beyond GUI thread. All what is needed is usage of bare lambdas (introduces in new C++11 standard) and Qt's \texttt{QtConcurrent::run}.
+So, we need to keep all business logic the same, but bring all database queries beyond GUI thread. 
+All what is needed is usage of bare lambdas (introduces in new C++11 standard) and Qt's \texttt{QtConcurrent::run}.
+
+To implement user interaction while database is applying query, we should do next:
+\begin{itemize}
+ \item Avoid applying database queries from GUI thread. \textit{It should be \texttt{QtConcurrent} with 
+    lambda which I propose.}
+ \item We must agree on how UI will react while applying queries:
+ \begin{itemize}
+  \item What to do in case of ``quick'' query (for example, $< 200 ms$)?
+  \item What to do in case of ``long'' query (for example, $\approx 3 s$)?
+  \item \underline{Who}, \underline{when}, \underline{where} and \underline{how} will inform user 
+    (for example, show \texttt{ProgressBar}, show \texttt{MessageBox} or so on)?
+  \item Is button ``Cancel'' planned?
+ \end{itemize}
+\end{itemize}
+
+\subsection{Transactions and multithreading}
+Transactions are good mechanism, and all of queries which modify database can be wraped onto transaction 
+system. But, well-known fact is that SQLite able to hold multithreading, but doesn't like it.
+
+Snazzer at StackOverflow%
+\footnote{``How to use SQLite in a multi-threaded application?'', \url{http://stackoverflow.com/a/1680871}}
+say on this:
+Some steps when starting out with SQLlite for multithreaded use:
+\begin{enumerate}
+ \item Make sure sqlite is compiled with the multi threaded flag.
+ \item You must call open on your sqlite file to create a connection on each thread, don't share connections 
+    between threads.
+ \item SQLite has a very conservative threading model, when you do a write operation, which includes opening 
+    transactions that are about to do an INSERT/UPDATE/DELETE, other threads will be blocked until this 
+    operation completes.
+ \item If you don't use a transaction, then transactions are implicit, so if you start a 
+    \texttt{INSERT/DELETE/UPDATE}, sqlite will try to acquire an exclusive lock, and complete the operation 
+    before releasing it.
+ \item If you do a \texttt{BEGIN EXCLUSIVE} statement, it will acquire an exclusive lock before doing operations 
+    in that transaction. A \texttt{COMMIT} or \texttt{ROLLBACK} will release the lock.
+ \item \ldots
+\end{enumerate}
+
+We must keep in mind that connection can only be used from within the thread that created it. Moving connections 
+between threads or creating queries from a different thread is not supported%
+\footnote{``Thread-Support in Qt Modules'' --
+\url{http://qt-project.org/doc/qt-4.8/threads-modules.html\#threads-and-the-sql-module}}.
+
+To avoid unexpected behavior as result of multithreaded queries, as I think, we must think out and create own 
+query manager. And till that time, try to avoid such type of concurrent queries.
+
+\paragraph{Library scanner and BaseSqlTableModel.} Unfortunately, I'm not involved into development of 
+Mixxx as well. Hope, that if this project will be approved as GSoC project for this summer, I can learn all nuances
+and propose something better.
+
+There will be some part of work on \texttt{BaseSqlTableModel}. Creating own class by subclassing \texttt{QAbstractTableModel}
+and extending it to hold SQL-table -- is good choice and it needs work on it and some kind of research. As I think that work 
+will be prolific and successful. I included this task into road-map.
 
 \subsection{How to use lambdas here?}
 
 Lambdas%
-\footnote{\textit{``Lambdas in C++''} at Wiki -- 
-\url{http://en.wikipedia.org/wiki/Anonymous\_function\#C.2B.2B}, 
-\textit{``What is a lambda expression in C++11?''} at StackOverflow -- 
+\footnote{\textit{``Lambdas in C++''} at Wiki --
+\url{http://en.wikipedia.org/wiki/Anonymous\_function\#C.2B.2B},
+\textit{``What is a lambda expression in C++11?''} at StackOverflow --
 \url{http://stackoverflow.com/questions/7627098/what-is-a-lambda-expression-in-c11}.}
-can help not to mess the code in places where ``fix'' will be applied. We just move the code that is called after response arrives to the lambda and pass it to the \texttt{DAO} as callback parameter. In this case we do not hang the application, but can gently show ``wait'' message. 
+can help not to mess the code in places where ``fix'' will be applied. We just move the code that is called 
+after response arrives to the lambda and pass it to the \texttt{DAO} as callback parameter. In this case we 
+do not hang the application, but can gently show ``wait'' message.
 
 
 \subsection{QtConcurrent}
 \texttt{QtConcurrent}%
 \footnote{\textit{``QtConcurrent Namespace''} at QtProject -- \url{http://qt-project.org/doc/qt-4.8/qtconcurrent.html}.}
-is simple mechanism to get programs multi-threaded with minimal overhead and also with minimal control on respective threads that is enough for us. Also, we can pass lambda to \texttt{QtCoucurrent::run} as parameter.
+is simple mechanism to get programs multi-threaded with minimal overhead and also with minimal control on 
+respective threads that is enough for us. Also, we can pass lambda to \texttt{QtCoucurrent::run} as parameter.
 
-To implement user interaction while database is applying query, we should do next:
-\begin{itemize}
- \item Avoid applying database queries from GUI thread. \textit{It should be \texttt{QtConcurrent} with lambda which I propose.}
- \item We must agree on how UI will react while applying queries:
- \begin{itemize}
-  \item What to do in case of ``quick'' query (for example, $< 200 ms$)?
-  \item What to do in case of ``long'' query (for example, $\approx 3 s$)?
-  \item \underline{Who}, \underline{when}, \underline{where} and \underline{how} will inform user (for example, show \texttt{ProgressBar}, show \texttt{MessageBox} or so on)?
-  \item Is button ``Cancel'' planned?
- \end{itemize}
-\end{itemize}
+The \texttt{QtConcurrent} namespace provides high-level APIs that make it possible to write multi-threaded 
+programs without using low-level threading primitives such as mutexes, read-write locks, wait conditions, or 
+semaphores. Programs written with \texttt{QtConcurrent} automatically adjust the number of threads used 
+according to the number of processor cores available. This means that applications written today will continue 
+to scale when deployed on multi-core systems in the future.
+
+The \texttt{QtConcurrent::run()} function runs a function in a separate thread. The return value of the function 
+is made available through the \texttt{QFuture} API.
+Example:
+
+\begin{verbatim}
+    extern void aFunction();
+    QFuture<void> future = QtConcurrent::run(aFunction);
+\end{verbatim}
+    
+This will run \texttt{aFunction} in a separate thread obtained from the default \texttt{QThreadPool}. You can use the 
+\texttt{QFuture} and \texttt{QFutureWatcher} classes to monitor the status of the function.
+
+\texttt{QFuture} allows threads to be synchronized against one or more results which will be ready at a later point 
+in time. The result can be of any type that has a default constructor and a copy constructor. 
+
+The state of the computation represented by a \texttt{QFuture} can be queried using the \texttt{isCanceled()}, 
+\texttt{isStarted()}, \texttt{isFinished()}, \texttt{isRunning()}, or \texttt{isPaused()} functions.
+
+\texttt{QFuture<void>} is specialized to not contain any of the result fetching functions. Any \texttt{QFuture<T>} 
+can be assigned or copied into a \texttt{QFuture<void>} as well. This is useful if only status or progress information 
+is needed -- not the actual result data.
 
 \section{How to solve problem?}
-I propose to rewrite code of calling \texttt{DAO}-objects. I created minimal project to show what I recommend to do. Here, you can see it: \url{http://github.com/troyane/lambdaConcurrent}.
+I propose to rewrite code of calling \texttt{DAO}-objects. I created minimal project to show what I recommend to do. 
+Here, you can see it: \url{http://github.com/troyane/lambdaConcurrent}.
 
 Main scheme is next:
 \begin{itemize}
  \item In GUI:
  \begin{enumerate}
   \item Prepare query string (as it was before).
-  \item Prepare lambda \textit{``how to freeze GUI''} \\(Inform user. Show some progress bar etc.).
-  \item Prepare lambda \textit{``how to unfreeze GUI''} \\(Inform user. Hide some progress bar etc.).
-  \item Call concrete \texttt{DAO}s \texttt{applyQuery} function with (2) and (3) parameters (lambdas \textit{``how to freeze GUI''}, \textit{``how to unfreeze GUI''}).
+  \item Prepare lambda \textit{``how to prepare GUI for long-time operation''} \\(Inform user. Show some progress bar etc.).
+  \item Prepare lambda \textit{``how to release GUI after long-tim operation''} \\(Inform user. Hide some progress bar etc.).
+  \item Call concrete \texttt{DAO}s \texttt{applyQuery} function with (2) and (3) parameters (lambdas 
+    \textit{``how to prepare GUI for long-time operation''}, \textit{``how to release GUI after long-tim operation''}).
   \item Release GUI thread -- let it flow as it is.
  \end{enumerate}
  \item In Concrete \texttt{DAO}s \texttt{applyQuery}:
@@ -110,14 +208,16 @@ Main scheme is next:
   \item Send lambda work to other thread (using \texttt{QtConcurrent::run}).
   \item Control time of thread working (using \texttt{QFuture}).
   \begin{itemize}
-   \item If thread is working longer than some constant limit time, we must apply received lambda as a parameter \textit{``how to freeze GUI''}.
-   \item If thread overtimed, than we need to apply received lambda as a parameter \textit{``how to unfreeze GUI''}.
+   \item If thread is working longer than some constant limit time, we must apply received lambda as a parameter 
+    \textit{``how to prepare GUI for long-time operation''}.
+   \item If thread overtimed, than we need to apply received lambda as a parameter \textit{``how to release GUI after long-tim operation''}.
   \end{itemize}
   \item Remove own event filter to unblock user input.
  \end{enumerate}
 \end{itemize}
 
-We'll wrap all code of \texttt{DAO}'s with the next construction (see \texttt{DAO::applyQuery} in file \url{http://github.com/troyane/lambdaConcurrent/blob/master/dao.cpp)}.
+We'll wrap all code of \texttt{DAO}'s with the next construction (see \texttt{DAO::applyQuery} in file 
+\url{http://github.com/troyane/lambdaConcurrent/blob/master/dao.cpp)}.
 
 I tried to comment as clear as I can, but if you have questions -- you are welcome.
 
@@ -146,6 +246,14 @@ I tried to comment as clear as I can, but if you have questions -- you are welco
   \item Make changes.
   \item Test applied changes.
  \end{itemize}
+ \item Work on \texttt{BaseSqlTableModel}...
+ \begin{itemize}
+  \item Research how \texttt{BaseSqlTableModel} and etc work.
+  \item Discuss possible changes to improve database access.
+  \item Write code.
+  \item Write documentation.
+ \end{itemize}
+
  \item Discuss all changes.
  \item Perform general test.
  \item Work on general documentation.
